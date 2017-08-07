@@ -1,0 +1,585 @@
+window.ramblerHead = window.ramblerHead || {};
+window.ramblerHead.ads = {};
+window.ramblerHead.bannersCapirs = [];
+window.ramblerHead.adfoxLoader = function(bannerName, params) {
+    var yaCounterId = 25662806;
+
+    // значение температуры для передачи в adfoxParams
+    var weatherTemperature = window.ramblerHead.weatherTemperature;
+    if (weatherTemperature != undefined && weatherTemperature < 0) {
+        // если значение отрицательное, то меняем минус на символ 'm'
+        weatherTemperature = 'M' + Math.abs(weatherTemperature);
+    }
+    var weatherState = window.ramblerHead.weatherState ? window.ramblerHead.weatherState : '';
+
+    if (arguments.length === 0) {
+        console.error('No arguments provided for adfoxLoader constructor');
+        return false;
+    }
+
+    // show news block when both ads loaded
+    var mixednewsPromoBanners = (function() {
+        window.mixednewsBannersLoadedCount = 0;
+        return {
+            loaded: function() {
+                if (++window.mixednewsBannersLoadedCount === 2) {
+                    $('.mixednews__col_second-row').removeClass('g-vhidden');
+                }
+            }
+        };
+    })();
+
+    var performanceMonitor = function(bannerName, label) {
+        if (window.performance && window.performance.now && bannerName === '240x400') {
+            var stopWatch = parseInt(window.performance.now());
+            ga('send', 'performance', 'ad_' + bannerName + '_load_' + label, stopWatch+'', stopWatch, {'nonInteraction': 1});
+        }
+    };
+
+    var onRender240x400 = function(promoId) {
+        var stopWatch = window.performance && window.performance.now ? parseInt(window.performance.now()) : false;
+        if (!this.bannerVisible) {
+            // Render Yandex.Direct if 240x400 ad load failed (HEAD-1721, HEAD-1860)
+            this.$placeholder.html('').attr('id', 'direct-240x400');
+            (function(w, d, n, s, t) {
+                w[n] = w[n] || [];
+                w[n].push(function() {
+                    Ya.Direct.insertInto(93572, "direct-240x400", {
+                        ad_format: "direct",
+                        stat_id: 69,
+                        type: "adaptive",
+                        border_type: "block",
+                        limit: 4,
+                        header_bg_color: "A5BCCB",
+                        title_font_size: 3,
+                        border_radius: true,
+                        links_underline: false,
+                        site_bg_color: "FFFFFF",
+                        border_color: "F2F8FB",
+                        bg_color: "F2F8FB",
+                        title_color: "000000",
+                        url_color: "777777",
+                        text_color: "000000",
+                        hover_color: "0066FF",
+                        sitelinks_color: "0000CC",
+                        favicon: true,
+                        no_sitelinks: true,
+                        height: 400,
+                        width: 240
+                    });
+                });
+                t = d.getElementsByTagName("script")[0];
+                s = d.createElement("script");
+                s.src = "//an.yandex.ru/system/context.js";
+                s.type = "text/javascript";
+                s.async = true;
+                t.parentNode.insertBefore(s, t);
+            })(window, document, "yandex_context_callbacks");
+
+            if (window.canRunAds === undefined) {
+                $('.mixednews-aside-item_banner-top').remove();
+                window['yaCounter' + yaCounterId].reachGoal('adblock_detect');
+                ga('send', 'adfox_240x400', 'adblock_detected', stopWatch+'', stopWatch, {'nonInteraction': 1});
+            }
+            else {
+                window['yaCounter' + yaCounterId].reachGoal('ad_not_show');
+                ga('send', 'adfox_240x400', 'adfox_240x400_not_shown', stopWatch+'', stopWatch, {'nonInteraction': 1});
+            }
+        }
+        else {
+            window['yaCounter' + yaCounterId].reachGoal('ad_show');
+            ga('send', 'adfox_240x400', 'adfox_240x400_shown', stopWatch+'', stopWatch, {'nonInteraction': 1});
+        }
+    };
+
+    var that = this;
+    var head = window.ramblerHead;
+    var BANNERS_PARAMS = {
+        // сторонний код адфокса для статистики
+        "storoni" : {
+            adfoxParams: {
+                p1: "bqwcg",
+                p2: "exqv",
+                pct: "a"
+            },
+            begunParams: {
+                "begun-block-id": "432293678",
+                "begun-auto-pad": "432151618"
+            },
+            placeholderID: "storoni"
+        },
+        // маленький баннер справа от строки поиска
+        "teaser_search" : {
+        	adfoxParams: {
+                p1: "brhii",
+                p2: "exqr",
+                pct: "c",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "437728682",
+                "begun-auto-pad": "432151618"
+            },
+            placeholderID: "adfox-teaser-search"
+        },
+        // 3-я строка новостей, баннер в виде промо-новости
+        "news_promo_10" : {
+        	adfoxParams: {
+                p1: "bsisl",
+                p2: "fdvd",
+                pct: "a",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432186244",
+                "begun-auto-pad": "432151618"
+            },
+            placeholderID: "adfox-banner-promo-10",
+            onRender: function() {
+                if (false === this.bannerVisible) {
+                    $('.mixednews-item_banner-10').removeClass('mixednews-item_banner mixednews-item_banner-10');
+                    $('#adfox-banner-promo-10').remove();
+                    mixednewsPromoBanners.loaded();
+                }
+            }
+        },
+        // 3-я строка новостей, баннер в виде промо-новости
+        "news_promo_12" : {
+        	adfoxParams: {
+                p1: "bsixb",
+                p2: "fdvd",
+                pct: "a",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432186248",
+                "begun-auto-pad": "432151618"
+            },
+            placeholderID: "adfox-banner-promo-12",
+            onRender: function() {
+                if (false === this.bannerVisible) {
+                  $('.mixednews-item_banner-12').removeClass('mixednews-item_banner mixednews-item_banner-12');
+                  $('#adfox-banner-promo-12').remove();
+                  mixednewsPromoBanners.loaded();
+                }
+            }
+        },
+        // баннер в самом верху страницы, над всем контентом
+        "topline" : {
+            adfoxParams: {
+                p1: "bquwr",
+                p2: "y",
+                pct: "c",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432185890",
+                "begun-auto-pad": "432151618"
+            },
+            rtb: true,
+            placeholderID: "adfox-topline",
+            onRender: function() {
+                if (true === this.bannerVisible) {
+                  $('#adfox-topline').css('margin-top', '10px');
+                }
+            }
+        },
+        // перед меню "другие проекты"
+        "superfooter" : {
+            adfoxParams: {
+                p1: "bsfjf",
+                p2: "fcuz",
+                pct: "a",
+                puid6: window.ramblerHead.currentSection,
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432185584",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: true,
+            rtb: true,
+            placeholderID: "adfox-superfooter",
+            onRender: function() {
+                // делаем отступ, если пришел баннер HEAD-3656
+                $('#adfox-superfooter').css('margin-top', '10px');
+            }
+        },
+        "240x400" : {
+            adfoxParams: {
+                p1: "bmdoj",
+                p2: "emhk",
+                pct: "c",
+                criteo: "crramb240=1",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id" : "432151666",
+                "begun-auto-pad" : "432151618"
+            },
+            rtb: true,
+            placeholderID: "adfox-240x400",
+            onRender: function() {
+                onRender240x400.call(this, "240x400_alter");
+            },
+            logErrors: true
+        },
+        "240x400_recommendations" : {
+            adfoxParams: {
+                p1: "bmdtr",
+                p2: "ewqs",
+                pct: "a",
+                criteo: 'crrambtxt240=1',
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432181186",
+                "begun-auto-pad": "432151618"
+            },
+            rtb: true,
+            scroll: true
+        },
+        "240x400_recommendations_place1" : {
+            adfoxParams: {
+                p1: "bsixn",
+                p2: "fdvo",
+                pct: "b",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432293682",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: true
+        },
+        "240x400_recommendations_place4" : {
+            adfoxParams: {
+                p1: "bqslv",
+                p2: "ewwf",
+                pct: "a",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432719860",
+                "begun-auto-pad": "432151618"
+            }
+        },
+        "240x400_recommendations_place6" : {
+            adfoxParams: {
+                p1: "bsixn",
+                p2: "fdvo",
+                pct: "b",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432293682",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: true
+        },
+        "240x400_recommendations_place7" : {
+            adfoxParams: {
+                p1: "bmdtr",
+                p2: "ewqs",
+                pct: "a",
+                criteo: 'crrambtxt240=1',
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432181186",
+                "begun-auto-pad": "432151618"
+            }
+        },
+        "240x400_recommendations_place10" : {
+            adfoxParams: {
+                p1: "bsixn",
+                p2: "fdvo",
+                pct: "b",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432293682",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: true
+        },
+        "240x400_recommendations_place15" : {
+            adfoxParams: {
+                p1: "brzko",
+                p2: "fcxp",
+                pct: "a",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432185682",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: true
+        },
+        "direct_horizontal" : {
+            adfoxParams: {
+                p1: "bscpi",
+                p2: "ewzc",
+                pct: "a",
+                puid29: weatherTemperature,
+                puid30: weatherState
+            },
+            begunParams: {
+                "begun-block-id": "432293966",
+                "begun-auto-pad": "432151618"
+            },
+            scroll: false,
+            placeholderID: "adfox-direct-horizontal"
+        },
+
+        // after head informers section
+        "m_top" : {
+            adfoxParams: {
+                'p1': 'bsxdm',
+                'p2': 'fexc',
+                'pct': 'a',
+                'criteo': 'crrambm300=1',
+                puid29: weatherTemperature,
+                puid30: weatherState,
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437707940"
+            },
+            placeholderID: "adfox-top"
+        },
+        "m_fullscreen" : {
+            adfoxParams: {
+                'p1': 'bsxdj',
+                'p2': 'etsa',
+                'pct': 'a',
+                puid29: weatherTemperature,
+                puid30: weatherState,
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437708046"
+            },
+            placeholderID: "adfox-fullscreen"
+        },
+        // 2nd screen and loadmore
+        "m_second_screen" : {
+            adfoxParams: {
+                'p1': 'bwdum',
+                'p2': 'emil',
+                'pct': 'a',
+                puid29: weatherTemperature,
+                puid30: weatherState,
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437707948"
+            },
+            scroll: true
+        },
+        //listing 1
+        'm_second_screen_news': {
+          adfoxParams: {
+            p1:  'bwdum',
+            p2:  'emil',
+            pct: 'a',
+            puid54: 1
+          },
+          begunParams: {
+            'begun-auto-pad': '437707936',
+            'begun-block-id': '437707948',
+          },
+          scroll: true
+        },
+        //listing 2
+        'm_second_screen_kassa': {
+            adfoxParams: {
+                p1:  'bwdun',
+                p2:  'emil',
+                pct: 'a',
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': '437707936',
+                'begun-block-id': '437707976',
+            },
+            scroll: true
+        },
+        //listing 3
+        m_second_screen_spec: {
+          adfoxParams: {
+              p1:  'bxmfe',
+              p2:  'fqbd',
+              pct: 'a',
+              puid54: 1
+          },
+          begunParams: {
+              'begun-auto-pad': '437707936',
+              'begun-block-id': '457396190',
+          },
+          scroll: true
+        },
+        //listing 4
+        m_second_screen_video:  {
+            adfoxParams: {
+                p1:  'bwduo',
+                p2:  'emil',
+                pct: 'a',
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': '437707936',
+                'begun-block-id': '437707980',
+            },
+            scroll: true
+        },
+        //listing 5
+        m_second_screen_recommendations: {
+            adfoxParams: {
+                p1:  'bwdup',
+                p2:  'emil',
+                pct: 'a',
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': '437707936',
+                'begun-block-id': '437707992',
+            },
+            scroll: true
+        },
+        //footer
+        m_second_screen_mobile: {
+            adfoxParams: {
+                'p1': 'bwdvc',
+                'p2': 'emil',
+                'pct': 'a',
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437708040"
+            },
+            scroll: true
+        },
+        "m_rich" : {
+            adfoxParams: {
+                'p1': 'btfco',
+                'p2': 'ffhi',
+                'pct': 'a',
+                puid29: weatherTemperature,
+                puid30: weatherState,
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437708048"
+			},
+            placeholderID: "adfox-rich",
+            sspRich: true
+        },
+        "m_adblock_panel": {
+            adfoxParams: {
+                'p1': 'bviei',
+                'p2': 'fjuq',
+                'pct': 'a',
+                puid29: weatherTemperature,
+                puid30: weatherState,
+                puid54: 1
+            },
+            begunParams: {
+                'begun-auto-pad': "437707936",
+                'begun-block-id': "437726156"
+            },
+            placeholderID: "adfox-adblock"
+        }
+    };
+
+    that.params = BANNERS_PARAMS[bannerName];
+
+    if (params) {
+        that.params = $.extend(true, that.params, params);
+    }
+
+    (function render() {
+        var adfMethod;
+        var bannerParams = that.params;
+        var $placeholder = $('#' + bannerParams.placeholderID);
+
+        performanceMonitor(bannerName, 'start');
+
+        that.$placeholder = $placeholder;
+
+        bannerParams.rtb = bannerParams.rtb === undefined ? false : bannerParams.rtb;
+        bannerParams.scroll = bannerParams.scroll === undefined ? false : bannerParams.scroll;
+
+        if (bannerParams.rtb && bannerParams.scroll) {
+            adfMethod = 'sspScroll';
+        } else if (bannerParams.rich === true) {
+            adfMethod = 'showRich';
+        } else if (bannerParams.sspRich === true) {
+            adfMethod = 'sspRich';
+        } else if (bannerParams.rtb && bannerParams.scroll === false) {
+            adfMethod = 'ssp';
+        } else if (bannerParams.rtb === false && bannerParams.scroll) {
+            adfMethod = 'sspScroll';
+        } else if (bannerParams.rtb === false && bannerParams.scroll === false && bannerParams.noSsp === true) {
+            adfMethod = 'show';
+        } else if (bannerParams.rtb === false && bannerParams.scroll === false) {
+            adfMethod = 'ssp';
+        }
+
+        // set section param
+        if (window.ramblerHead.currentSection !== undefined) {
+            var section = head.currentSection === ''
+                ? 'MAIN'
+                : head.currentSection.toUpperCase();
+            bannerParams.adfoxParams['puid6'] = section;
+        }
+
+        // SEO
+        $placeholder.before('<!--noindex-->');
+        $placeholder.after('<!--/noindex-->');
+
+        //HEAD-2995
+        bannerParams.adfoxParams['puid54'] = '1';
+
+        bannerLoadCallback = (bannerInfo) => {
+          bannerParams.bannerVisible = bannerInfo.status;
+          if (bannerParams.onRender) {
+            bannerParams.onRender();
+          }
+        }
+
+        // bannerErrorCallbaсk = () => {
+        //   console.warn(`Something went wrong with banner [${bannerName}]`);
+        // }
+
+        // try to load
+        if (window.Adf) {
+            // window.Adf.util.debug = false;
+            window.Adf.banner[adfMethod](
+                bannerParams.placeholderID,
+                bannerParams.adfoxParams,
+                bannerParams.begunParams
+            )
+            .then(this.bannerLoadCallback);
+            // .catch(this.bannerErrorCallbaсk);
+        }
+    })();
+};

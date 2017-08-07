@@ -1,0 +1,7 @@
+requirejs.config({
+    waitSeconds: 200,
+    paths: {
+        "main": "js/head.min"
+    }
+});
+requirejs(["main"]);
