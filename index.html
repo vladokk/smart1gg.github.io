@@ -239,7 +239,7 @@
         var crtg_script = document.createElement('script');
         crtg_script.type = 'text/javascript';
         crtg_script.src = crtg_url;
-        crtg_script.async = true;
+        crtg_script.async = false;
         if (document.getElementsByTagName("head").length > 0)document.getElementsByTagName("head")[0].appendChild(crtg_script);
         else if (document.getElementsByTagName("body").length > 0)document.getElementsByTagName("body")[0].appendChild(crtg_script);
     })();
